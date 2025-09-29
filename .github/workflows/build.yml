@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'mmistakes/minimal-mistakes'
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout repository
@@ -21,12 +20,17 @@ jobs:
       - name: Fix Git safe.directory
         run: git config --global --add safe.directory /github/workspace
 
-      # Step 3: Setup Ruby
+      # Step 3: Automatically fix empty highlight tags in Markdown
+      - name: Fix highlight tags in Markdown
+        run: |
+          find docs/ -name "*.md" -type f -exec sed -i 's/{% highlight %}/{% highlight text %}/g' {} +
+
+      # Step 4: Setup Ruby
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
 
-      # Step 4: Setup cache for Bundler
+      # Step 5: Setup cache for Bundler
       - name: Setup cache for Bundler
         id: cache
         uses: actions/cache@v4
@@ -38,7 +42,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bundler-
 
-      # Step 5: Install dependencies with Bundler
+      # Step 6: Install dependencies with Bundler
       - name: Install - Bundler
         env:
           MAKE: make -j2
@@ -48,12 +52,12 @@ jobs:
           bundle install --jobs=4 --retry=3
           bundle clean
 
-      # Step 6: Build the Jekyll site
+      # Step 7: Build the Jekyll site
       - name: Build site
         working-directory: docs/
         run: bundle exec jekyll build
 
-      # Step 7: Update Algolia index (optional)
+      # Step 8: Update Algolia index (optional)
       - name: Update Algolia index
         working-directory: docs/
         run: bundle exec jekyll algolia push
