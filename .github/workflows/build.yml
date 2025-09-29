@@ -12,36 +12,51 @@ jobs:
     if: github.repository == 'mmistakes/minimal-mistakes'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      # Step 1: Checkout repository
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-    - name: Setup cache for Bundler
-      id: cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          docs/Gemfile.lock
-          docs/vendor/bundle
-        key: ${{ runner.os }}-bundler-${{ hashFiles('docs/Gemfile') }}
-        restore-keys: |
-          ${{ runner.os }}-bundler-
+      # Step 2: Fix Git "dubious ownership" issue
+      - name: Fix Git safe.directory
+        run: git config --global --add safe.directory /github/workspace
 
-    - name: Install - Bundler
-      env:
-        MAKE: make -j2
-      working-directory: docs/
-      run: |
-        bundle config set path vendor/bundle
-        bundle install --jobs=4 --retry=3
-        bundle clean
+      # Step 3: Setup Ruby
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
 
-    - name: Update Algolia index
-      working-directory: docs/
-      run: bundle exec jekyll algolia push
-      env:
-        ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
-      continue-on-error: true
+      # Step 4: Setup cache for Bundler
+      - name: Setup cache for Bundler
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/Gemfile.lock
+            docs/vendor/bundle
+          key: ${{ runner.os }}-bundler-${{ hashFiles('docs/Gemfile') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-
+
+      # Step 5: Install dependencies with Bundler
+      - name: Install - Bundler
+        env:
+          MAKE: make -j2
+        working-directory: docs/
+        run: |
+          bundle config set path vendor/bundle
+          bundle install --jobs=4 --retry=3
+          bundle clean
+
+      # Step 6: Build the Jekyll site
+      - name: Build site
+        working-directory: docs/
+        run: bundle exec jekyll build
+
+      # Step 7: Update Algolia index (optional)
+      - name: Update Algolia index
+        working-directory: docs/
+        run: bundle exec jekyll algolia push
+        env:
+          ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+        continue-on-error: true
