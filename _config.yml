@@ -8,7 +8,7 @@ title_separator          : "-"
 subtitle                 : "Cloud | Blue Team | AI "
 name                     : "Salma Zaime"
 description              : "Cybersecurity student building hands-on projects in cloud security, blue team detection engineering, and AI for security."
-url                      : "https://salmazaime.github.io" # replace with your GitHub Pages URL
+url                      : "https://github.com/salmazaime/portfolio/blob/main/_config.yml" 
 baseurl                  : "/portfolio" # since you're using a repo named portfolio
 repository               : "salmazaime/portfolio"
 logo                     : # optional, add later if you upload a logo to /assets/images/
