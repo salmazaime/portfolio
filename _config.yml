@@ -77,6 +77,8 @@ plugins:
   - jekyll-gist
   - jekyll-feed
   - jekyll-include-cache
+  # AJOUTEZ CETTE LIGNE CRITIQUE :
+  - minimal-mistakes-jekyll
 
 # Archives
 category_archive:
